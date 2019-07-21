@@ -1,0 +1,3 @@
+%{
+  "changed_reloader": {:hex, :changed_reloader, "0.1.4", "58b0cc2e52b90d27715a1e8a944efe49ef2256d09ed5417929171c9e25df85e9", [:mix], [], "hexpm"},
+}

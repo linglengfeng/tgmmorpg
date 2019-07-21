@@ -1,0 +1,18 @@
+{"1.1.0",
+[{<<"bson">>,{pkg,<<"bson_erlang">>,<<"0.3.0">>},1},
+ {<<"emysql">>,
+  {git,"https://github.com/inaka/Emysql",
+       {ref,"ba1ddda5fce576952cc31e072dc3a432791f132c"}},
+  0},
+ {<<"mongodb">>,{pkg,<<"mongodb_erlang">>,<<"3.2.0">>},0},
+ {<<"pbkdf2">>,{pkg,<<"pbkdf2">>,<<"2.0.0">>},1},
+ {<<"poolboy">>,{pkg,<<"poolboy">>,<<"1.5.2">>},1},
+ {<<"ranch">>,{pkg,<<"ranch">>,<<"1.4.0">>},0}]}.
+[
+{pkg_hash,[
+ {<<"bson">>, <<"FD6EC3874EDB1AB6DDC3D9AEDEC479772045883B17666D2BDD6431EEE4548118">>},
+ {<<"mongodb">>, <<"779498CE456932C11B30DF493B95C1DD00E083F13E0C8AA656F466DD1C37A5E9">>},
+ {<<"pbkdf2">>, <<"11C23279FDED5C0027AB3996CFAE77805521D7EF4BABDE2BD7EC04A9086CF499">>},
+ {<<"poolboy">>, <<"392B007A1693A64540CEAD79830443ABF5762F5D30CF50BC95CB2C1AAAFA006B">>},
+ {<<"ranch">>, <<"10272F95DA79340FA7E8774BA7930B901713D272905D0012B06CA6D994F8826B">>}]}
+].

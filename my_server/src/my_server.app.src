@@ -1,0 +1,34 @@
+{application, my_server,
+ [{description, "An OTP application"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {my_server_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    ranch,
+    emysql,
+    mongodb
+   ]},
+   
+  {env, [
+    % {server_id, 1},
+    % {port, 1111}, % 端口
+    % {reloader, true}, % 是否启用reloader
+    % {db_mysql, [{size, 10}, {user, "root"}, {password, "123456"}, 
+    %   {host, "localhost"}, {port, 3306}, {database, "tgmmorpg"}, {encoding, utf8}]},
+    % {mongo, [{database, <<"test">>}]}
+  ]},
+  
+  {modules, []},
+
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+
+ ]}.
+
+
+
+
+
+
