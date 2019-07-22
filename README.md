@@ -81,6 +81,11 @@ mongodb 说明
   show dbs 查看所有数据库
   use runoob
 
+git:
+  git config  credential.helper store                                             
+  这里没有--global意思是指只对这个仓库生效，建议以后都不要加--global
+  让代码配置以仓库为单位存储就好，设置成全局不灵活
+
 
 
 遇到过的神奇问题
