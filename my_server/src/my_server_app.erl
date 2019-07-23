@@ -49,9 +49,15 @@ restart() ->
 
 services() ->
   case application:get_env(use_db) of
-    {ok, mysql} -> db_mysql:init();
-    {ok, mongo} -> start_child(mongo_sup, 5000, supervisor);
-    _ -> start_child(mongo_sup, 5000, supervisor)
+    {ok, mysql} -> 
+      ?DEBUG("use db: mysql\n"),
+      db_mysql:init();
+    {ok, mongo} -> 
+      ?DEBUG("use db: mongo\n"),
+      start_child(mongo_sup, 5000, supervisor);
+    _ -> 
+      ?DEBUG("use db: mongo\n"),
+      start_child(mongo_sup, 5000, supervisor)
   end,
 
   ok.

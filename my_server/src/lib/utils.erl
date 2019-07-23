@@ -4,6 +4,30 @@
 
 -include("common.hrl").
 
+to_string(X) -> lists:flatten(io_lib:format("~w", [X])).
+
+to_atom(X) when is_atom(X) -> X;
+to_atom(X) -> string_to_atom(to_list(X)).
+
+to_list(X) when is_integer(X)     -> integer_to_list(X);
+to_list(X) when is_binary(X)      -> binary_to_list(X);
+to_list(X) when is_float(X)       -> float_to_list(X);
+to_list(X) when is_atom(X)        -> atom_to_list(X);
+to_list(X) when is_binary(X)      -> binary_to_list(X);
+to_list(X) when is_bitstring(X)   -> bitstring_to_list(X);
+to_list(X) when is_pid(X)         -> pid_to_list(X);
+to_list(X) when is_function(X)    -> erlang:fun_to_list(X);
+to_list(X) when is_port(X)        -> erlang:port_to_list(X);
+to_list(X) when is_tuple(X)       -> to_string(X);
+to_list(X) when is_list(X)        -> X;
+to_list(X)                        -> to_string(X).
+
+string_to_atom(Str) ->
+  case catch(list_to_existing_atom(Str)) of
+    {'EXIT', _} -> list_to_atom(Str);
+    Atom when is_atom(Atom) -> Atom
+  end.
+
 % term序列化
 term_to_string(Term) -> io_lib:format("~w", [Term]).
 

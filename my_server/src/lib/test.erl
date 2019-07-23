@@ -75,7 +75,7 @@ match4(_A) ->
 
 db_test(Times) ->%% 每次创建耗费大概0.15s
   {T2, _} = timer:tc(lists, foreach, [fun(_T) -> 
-      db_role:create(test, 101, "test" ++ "_" ++ utils:term_to_string(utils:rand(1, 1000000))) 
+      db_role:create_mysql(test, 101, "test" ++ "_" ++ utils:term_to_string(utils:rand(1, 1000000))) 
     end, lists:seq(1, Times)]),
   T2.
 
@@ -83,12 +83,17 @@ db_test1(Times, Id) ->%% 每次大概0.07s
   {ok, Data} = db_role:load(Id),
   NewData = Data#{id => Id, test => Id, info => #{}},
   {T2, _} = timer:tc(lists, foreach, [fun(_T) -> 
-      db_role:save(NewData)
+      db_role:save_mysql(NewData)
     end, lists:seq(1, Times)]),
   T2.
 
 db_test2(Times, Name) ->%% 大概每100次耗时0.1s
   {T2, _} = timer:tc(lists, foreach, [fun(_T) -> 
-      db_role:repeat_name(Name)
+      db_role:repeat_name_mysql(Name)
     end, lists:seq(1, Times)]),
   T2.
+
+db_test3(Id) ->
+ok.
+
+% timer:tc(lists, foreach, [fun(_T) -> mongo_agent:count("role_test", #{}) end, lists:seq(1, 100)]).

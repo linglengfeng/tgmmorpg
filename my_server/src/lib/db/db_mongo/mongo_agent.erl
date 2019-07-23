@@ -58,6 +58,7 @@ call(Request) ->
 cast(Request) ->
   gen_server:cast(?MODULE, Request).
 
+-spec find(string(), list()) -> term().
 find(Collection, Args) ->
   case catch call({find, Collection, Args}) of
     {ok, Pid} -> 
@@ -73,6 +74,7 @@ find(Collection, Args) ->
       ok
 end.
 
+-spec find_one(string(), list()) -> term().
 find_one(Collection, Args) ->
   case catch call({find_one, Collection, Args}) of
     Result = #{} -> Result;
@@ -81,13 +83,16 @@ find_one(Collection, Args) ->
       ok
   end.
 
+-spec insert_one(string(), map()) -> term().
 insert_one(Collection, Args) ->
   cast({insert, Collection, [Args]}).
 
+-spec insert_many(string(), list()) -> term().
 insert_many(Collection, List) ->
   [insert_one(Collection, X) || X <- List].
 
 % 只允许通过id更新
+-spec update_one(string(), integer(), map()) -> term().
 update_one(Collection, Id, Changed) ->
   Command = #{<<"$set">> => Changed},
   BsonId = list_to_binary(integer_to_list(Id)),
@@ -98,29 +103,123 @@ update_one(Collection, Id, Changed) ->
       ok
   end.
 
+-spec update_many(string(), list()) -> term().
 update_many(Collection, List) ->
   [update_one(Collection, Id, Changed) || {Id, Changed} <- List].
 
+-spec count(string(), map()) -> term().
 count(Collection, Condition) ->
   call({count, Collection, [Condition]}).
 
 % note:慎用 
 % 若有其他根据条件删除再加接口
+-spec delete(string(), integer()) -> term().
 delete(Collection, Id) ->
   BsonId = list_to_binary(integer_to_list(Id)),
   cast({delete, Collection, [#{<<"id">> => BsonId}]}).
 
 % 通用接口 mc_worker_api 详情去看源码
+-spec call_api(atom(), string(), term()) -> term().
 call_api(Func, Collection, Args) ->
   case catch call({Func, Collection, Args}) of
     Reason -> Reason  
   end.
 
+-spec cast_api(atom(), string(), term()) -> term().
 cast_api(Func, Collection, Args) ->
   cast({Func, Collection, Args}).
 
-% todo:写一个map的key value转换成bson的函数
-% 例如 #{id => 1}   ===>> #{<<"id">> => <<"1">>}
+% 某些不能转用到了再说吧
+key_to_mongo_key(Map) when is_map(Map) ->
+  maps:fold(fun(K, V, Acc) ->
+    Acc#{utils:to_atom(type_deparse(K)) => key_to_mongo_key(V)}
+  end, #{}, Map);
+key_to_mongo_key(Map) ->
+  Map.
+
+parse_mongo_key(Map) when is_map(Map) ->
+  NewMap = maps:remove(<<"_id">>, Map),
+  maps:fold(fun(K, V, Acc) ->
+      Acc#{parse_key_to_atom1(K) => parse_mongo_key(V)}
+  end, #{}, NewMap);
+parse_mongo_key(Map) ->
+  Map.
+
+type_deparse(Value) when is_integer(Value) ->
+  {Value, int};
+type_deparse(Value) when is_atom(Value) ->
+  {Value, atom};
+type_deparse(Value) when is_list(Value) ->
+  {Value, list};
+type_deparse(Value) ->
+  Value.
+
+type_parse({Value, int}) ->
+  Value;
+type_parse({Value, atom}) ->
+  Value;
+type_parse({Value, list}) ->
+  Value;
+type_parse(Value) when is_integer(Value) ->
+  integer_to_list(Value);
+type_parse(Value) when is_atom(Value) ->
+  atom_to_list(Value);
+type_parse(Value) ->
+  Value.
+
+parse_key_to_atom1(Key) when Key =:= <<"_id">> ->
+  Key;
+parse_key_to_atom1(Key) when is_binary(Key) ->
+  case utils:string_to_term(binary_to_list(Key)) of
+    {ok, Value} -> type_parse(Value);
+    _Err -> 
+      ?DEBUG("canot parse_key_to_atom:~w\n", [_Err]),
+      Key
+  end;
+parse_key_to_atom1(Key) ->
+  Key.
+
+% test
+% M = #{1 => 1, "1" => 2, atom => 3, "atom" => 5, [1,2,3] => 6, {#{}, [], 1, "a"} => 8}.
+% M1 = mongo_agent:key_to_mongo_key(M).
+% mongo_agent:insert_one("role_test", M1#{<<"_id">> => 44}).
+% Find2 = mongo_agent:find_one("role_test", [#{<<"_id">> => 44}]).
+% mongo_agent:parse_mongo_key(Find2).
+
+% % note: map中的key不能太复杂，具体不能用那些用到了再备注吧
+% % 确定没问题的有 atom，int，tuple
+% % aaa 与 "aaa", 2 与 "2"这种做key效果是一样的
+% % key不能是 [1,2,3]这种list
+% int_key_to_string(Map) when is_map(Map) ->
+%   maps:fold(fun(K, V, Acc) ->
+%     case K of
+%       K when is_integer(K) -> Acc#{utils:to_atom(K) => int_key_to_string(V)};
+%       K -> Acc#{utils:to_atom(K) => int_key_to_string(V)}
+%     end
+%   end, #{}, Map);
+% int_key_to_string(Map) ->
+%   Map.
+
+% to_atom_key(Config) when is_map(Config) ->
+%   maps:fold(fun(K, V, Acc) ->
+%       Acc#{parse_key_to_atom(K) => to_atom_key(V)}
+%   end, #{}, Config);
+% to_atom_key(Config) when is_list(Config) ->
+%   maps:map(fun(_K, V) ->
+%       to_atom_key(V)
+%   end, Config);
+% to_atom_key(Config) ->
+%   Config.
+
+% parse_key_to_atom(Key) when is_binary(Key) ->
+%   case utils:string_to_term(binary_to_list(Key)) of
+%     {ok, Value} -> Value;
+%     _Err -> 
+%       ?DEBUG("canot parse_key_to_atom:~w\n", [_Err]),
+%       Key
+%   end;
+% parse_key_to_atom(Key) ->
+%   Key.
 
 
 
