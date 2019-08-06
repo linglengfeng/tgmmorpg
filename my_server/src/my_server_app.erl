@@ -48,7 +48,7 @@ restart() ->
   start().
 
 services() ->
-  case application:get_env(use_db) of
+  case ?ENV(use_db) of
     {ok, mysql} -> 
       ?DEBUG("use db: mysql\n"),
       db_mysql:init();

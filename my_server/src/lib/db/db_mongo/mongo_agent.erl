@@ -74,12 +74,30 @@ find(Collection, Args) ->
       ok
 end.
 
+-spec find_all(string(), list()) -> list().
+find_all(Collection, Args) ->
+  case catch call({find, Collection, Args}) of
+    {ok, Pid} -> 
+      Return = find_all_loop(Pid, ok, []),
+      mc_cursor:close(Pid),
+      Return;
+    _Err -> 
+      ?DEBUG("mongo_agent:find err: ~w\n", [_Err]),
+      ok
+end.
+
+find_all_loop(Pid, ok, Return) ->
+  find_all_loop(Pid, mc_cursor:next(Pid), Return);
+find_all_loop(Pid, {LastReture}, Return) ->
+  find_all_loop(Pid, mc_cursor:next(Pid), [LastReture | Return]);
+find_all_loop(_Pid, _, Return) ->
+  Return.
+
 -spec find_one(string(), list()) -> term().
 find_one(Collection, Args) ->
   case catch call({find_one, Collection, Args}) of
     Result = #{} -> Result;
     _Err -> 
-      ?DEBUG("mongo_agent:find_one err: ~w\n", [_Err]),
       ok
   end.
 
@@ -95,8 +113,7 @@ insert_many(Collection, List) ->
 -spec update_one(string(), integer(), map()) -> term().
 update_one(Collection, Id, Changed) ->
   Command = #{<<"$set">> => Changed},
-  BsonId = list_to_binary(integer_to_list(Id)),
-  case catch call({update, Collection, [#{<<"id">> => BsonId}, Command]}) of
+  case catch call({update, Collection, [#{<<"_id">> => Id}, Command]}) of
     {true , _} -> ok;
     _Err ->
       ?DEBUG("mongo_agent:update err: ~w\n", [_Err]),
@@ -115,8 +132,7 @@ count(Collection, Condition) ->
 % 若有其他根据条件删除再加接口
 -spec delete(string(), integer()) -> term().
 delete(Collection, Id) ->
-  BsonId = list_to_binary(integer_to_list(Id)),
-  cast({delete, Collection, [#{<<"id">> => BsonId}]}).
+  cast({delete, Collection, [#{<<"_id">> => Id}]}).
 
 % 通用接口 mc_worker_api 详情去看源码
 -spec call_api(atom(), string(), term()) -> term().

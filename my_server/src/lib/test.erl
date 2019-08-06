@@ -93,7 +93,16 @@ db_test2(Times, Name) ->%% 大概每100次耗时0.1s
     end, lists:seq(1, Times)]),
   T2.
 
-db_test3(Id) ->
-ok.
+db_test3(AccountId, Name) ->
+  {ok, Id, R1} = case db_role:create(AccountId, 101, Name) of
+    Result = {ok, _, _} -> Result;
+    _Err -> {ok, -1, _Err}
+  end,
+  R2 = db_role:load_mongo(Id),
+  R4 = db_role:role_list_mongo(AccountId),
+  {Id, R1, R2, R4}.
 
-% timer:tc(lists, foreach, [fun(_T) -> mongo_agent:count("role_test", #{}) end, lists:seq(1, 100)]).
+db_test4(Id) ->
+  Data = db_role:load(Id),
+  NewData = Data#{test => test111},
+  db_role:save(NewData).

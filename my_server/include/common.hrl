@@ -22,7 +22,7 @@
 
 -define(ALLENV, application:get_env(outside_service, env)).
 
--define(ENV(K), maps:get(K, element(2, ?ALLENV), null)).
+-define(ENV(K), maps:get(K, element(2, ?ALLENV), undefined)).
 
 -define(SERVERID, ?ENV(server_id)).
 

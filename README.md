@@ -70,7 +70,7 @@ mysql 说明
   mysql -u root -p123456
 
 mongodb 说明
-  菜鸟：https://www.runoob.com/mongodb/mongodb-databases-documents-collections.html
+  菜鸟：https://www.runoob.com/mongodb/mongodb-databases-documents-collections.html 官网下载zip文件解压了就行
   git下载安装adminmongo: https://github.com/mrvautin/adminMongo
   启动MongoDB服务net start MongoDB
   关闭MongoDB服务net stop MongoDB
@@ -82,7 +82,9 @@ mongodb 说明
   use runoob
 
 rebar3
-  cd my_server
+  安装 $ git clone https://github.com/erlang/rebar3.git
+  $ cd rebar3
+  $ ./bootstrap
   启动运行 rebar3 shell
 
 git:
